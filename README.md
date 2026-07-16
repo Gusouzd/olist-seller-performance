@@ -1,18 +1,38 @@
 # Olist Seller Performance Pipeline
 
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?logo=postgresql&logoColor=white)
+![pandas](https://img.shields.io/badge/pandas-150458?logo=pandas&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-013243?logo=numpy&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?logo=sqlalchemy&logoColor=white)
+
 Pipeline ETL que extrai dados de e-commerce do PostgreSQL, calcula métricas de performance por vendedor e entrega os resultados prontos para consulta no banco de dados e em CSV.
 
 ---
 
 ## O que o pipeline faz
 
-1. **Extrai** as tabelas de pedidos, itens, avaliações e vendedores direto do banco de dados
-2. **Transforma** os dados calculando quatro métricas por vendedor:
-   - Receita total
-   - Ticket médio
-   - Avaliação média dos clientes
-   - Taxa de entrega no prazo
-3. **Carrega** o resultado em uma tabela no PostgreSQL e exporta um CSV pronto para análise
+```
+PostgreSQL (dados brutos)
+    ↓ Extrai
+Python — junta e limpa as tabelas
+    ↓ Transforma
+Calcula métricas por vendedor
+    ↓ Carrega
+PostgreSQL → tabela olist_sales_performance
+CSV        → relatório para o gestor
+```
+
+**Métricas calculadas por vendedor:**
+
+| Métrica | Descrição |
+|---|---|
+| `receita_total` | Soma de todos os pedidos do vendedor |
+| `ticket_medio` | Valor médio por pedido |
+| `avaliacao_media` | Média das avaliações dos clientes |
+| `taxa_entrega_no_prazo` | % de pedidos entregues antes da data estimada |
+
+---
 
 ## Por que isso importa
 
@@ -22,13 +42,29 @@ Monitorar a performance de vendedores é essencial em qualquer operação de e-c
 
 ## Tecnologias utilizadas
 
-- **Python** — linguagem principal
-- **pandas** — transformação e agregação dos dados
-- **NumPy** — cálculo da métrica de entrega no prazo
-- **SQLAlchemy** — conexão com o banco de dados
-- **psycopg2** — driver PostgreSQL
-- **python-dotenv** — gerenciamento seguro de credenciais
-- **PostgreSQL** — banco de dados fonte e destino
+| Tecnologia | Uso |
+|---|---|
+| Python | Linguagem principal |
+| pandas | Transformação e agregação dos dados |
+| NumPy | Cálculo da métrica de entrega no prazo |
+| SQLAlchemy | Conexão com o banco de dados |
+| psycopg2 | Driver PostgreSQL |
+| python-dotenv | Gerenciamento seguro de credenciais |
+| PostgreSQL | Banco de dados fonte e destino |
+
+---
+
+## Estrutura do projeto
+
+```
+olist-seller-performance/
+├── .env                        # credenciais (não vai pro GitHub)
+├── .gitignore
+├── pipeline.py                 # pipeline ETL principal
+├── pipeline.log                # logs de execução (gerado automaticamente)
+├── olist_sales_performance.csv # relatório exportado
+└── README.md
+```
 
 ---
 
@@ -66,9 +102,10 @@ python pipeline.py
 |---|---|
 | Tabela `olist_sales_performance` | Resultado carregado no PostgreSQL |
 | `olist_sales_performance.csv` | Relatório exportado para análise |
+| `pipeline.log` | Log completo da execução com timestamps |
 
 ---
 
 ## Dataset
 
-[Olist Brazilian E-Commerce](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) — dataset público disponível no Kaggle com dados reais de uma plataforma de e-commerce brasileira.
+[Olist Brazilian E-Commerce](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) — dataset público com dados reais de uma plataforma de e-commerce brasileira.

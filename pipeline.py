@@ -1,9 +1,19 @@
 import pandas as pd
 import numpy as np
+import logging
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from dotenv import load_dotenv
 import os
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s',
+    handlers=[
+        logging.FileHandler('pipeline.log'), 
+        logging.StreamHandler()
+    ]
+)
 
 def criar_conexao():
     load_dotenv()
@@ -18,13 +28,16 @@ def criar_conexao():
     return create_engine(url)
 
 def extrair(engine):
+    logging.info("Extraindo tabelas...")
     order_items = pd.read_sql("SELECT * FROM order_items", con=engine)
     order_reviews = pd.read_sql("SELECT * FROM order_reviews", con=engine)
     orders = pd.read_sql("SELECT * FROM orders", con=engine)
     sellers = pd.read_sql("SELECT * FROM sellers", con=engine)
+    logging.info("Tabelas extraídas com sucesso.")
     return order_items, orders, sellers, order_reviews
 
 def transformar(order_items, orders, sellers, order_reviews):
+    logging.info("Realizando as trativas com as tabelas ...")
     df = order_items.merge(orders, on='order_id')
     df = df.merge(sellers, on='seller_id')
 
@@ -45,9 +58,11 @@ def transformar(order_items, orders, sellers, order_reviews):
         avaliacao_media=('review_score', 'mean'),
         taxa_entrega_no_prazo=('entrega_no_prazo', 'mean')
     )
+    logging.info("Trativas realizadas com sucesso.")
     return df
 
 def carregar(df, engine):
+    logging.info("Exportando as tabelas...")
     df.to_sql(
         name='olist_sales_performance',
         con=engine,
@@ -55,6 +70,7 @@ def carregar(df, engine):
         index=True
     )
     df.to_csv('olist_sales_performance.csv')
+    logging.info("Tabelas exportadas com sucesso.")
 
 # Execução
 engine = criar_conexao()

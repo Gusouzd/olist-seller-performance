@@ -47,6 +47,32 @@ def extrair(engine):
         logging.error(f"Erro ao extrair tabelas: {e}")
         raise
 
+def validar(order_items, orders, order_reviews):
+    logging.info("Validando qualidade dos dados...")
+    
+    preco_invalido = order_items[order_items['price'] <= 0]
+    if len(preco_invalido) > 0:
+        logging.warning(f"{len(preco_invalido)} linhas com preço inválido encontradas.")
+    
+    ids_invalidos = order_items[~order_items['order_id'].isin(orders['order_id'])]
+    if len(ids_invalidos) > 0:
+        logging.warning(f"{len(ids_invalidos)} order_ids sem correspondência em orders.")
+    
+    avaliacoes_negativas = order_reviews[~order_reviews['review_score'].isin([1, 2, 3, 4, 5])]
+    if len(avaliacoes_negativas) > 0:
+        logging.warning(f"{len(avaliacoes_negativas)} linhas com avaliações invalidas encontradas.")
+
+    datas_erradas = orders[orders['order_delivered_customer_date'] < orders['order_purchase_timestamp']]
+    if len(datas_erradas) > 0:
+        logging.warning(f"{len(datas_erradas)} linhas com datas de entrega, ou data de compra invalidas.")
+    
+    nulos = orders.isnull().sum()
+    nulos = nulos[nulos > 0]
+    if len(nulos) > 0:
+        logging.warning(f"Colunas com nulos encontradas: {nulos.to_dict()}")
+
+    logging.info("Validação concluída.")
+
 def transformar(order_items, orders, sellers, order_reviews):
     try:
         logging.info("Realizando as tratativas com as tabelas...")
@@ -94,5 +120,6 @@ def carregar(df, engine):
 # Execução
 engine = criar_conexao()
 order_items, orders, sellers, order_reviews = extrair(engine)
+validar(order_items, orders, order_reviews)
 df = transformar(order_items, orders, sellers, order_reviews)
 carregar(df, engine)

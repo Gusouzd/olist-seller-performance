@@ -6,7 +6,7 @@
 ![NumPy](https://img.shields.io/badge/NumPy-013243?logo=numpy&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?logo=sqlalchemy&logoColor=white)
 
-Pipeline ETL que extrai dados de e-commerce do PostgreSQL, calcula métricas de performance por vendedor e entrega os resultados prontos para consulta no banco de dados e em CSV.
+Pipeline ETL que extrai dados de e-commerce do PostgreSQL, valida a qualidade dos dados, calcula métricas de performance por vendedor e entrega os resultados prontos para consulta no banco de dados e em CSV.
 
 ---
 
@@ -15,7 +15,9 @@ Pipeline ETL que extrai dados de e-commerce do PostgreSQL, calcula métricas de 
 ```
 PostgreSQL (dados brutos)
     ↓ Extrai
-Python — junta e limpa as tabelas
+Python — lê as tabelas do banco
+    ↓ Valida
+Verifica qualidade e consistência dos dados
     ↓ Transforma
 Calcula métricas por vendedor
     ↓ Carrega
@@ -31,6 +33,22 @@ CSV        → relatório para o gestor
 | `ticket_medio` | Valor médio por pedido |
 | `avaliacao_media` | Média das avaliações dos clientes |
 | `taxa_entrega_no_prazo` | % de pedidos entregues antes da data estimada |
+
+---
+
+## Validação de qualidade dos dados
+
+Antes de transformar, o pipeline valida automaticamente:
+
+| Validação | O que verifica |
+|---|---|
+| Preço inválido | Itens com preço menor ou igual a zero |
+| Integridade referencial | Order IDs sem correspondência em orders |
+| Avaliações fora do range | Review scores fora do intervalo de 1 a 5 |
+| Datas impossíveis | Entregas registradas antes da data de compra |
+| Nulos por coluna | Colunas com valores ausentes em orders e order_items |
+
+Problemas encontrados são registrados como `WARNING` no log de execução.
 
 ---
 
